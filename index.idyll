@@ -1,0 +1,131 @@
+[meta title:"ICU On call" description:"Musings about the critical care rota" /]
+
+[Header
+  fullWidth:true
+  title:"ICU On call"
+  subtitle:"Modelling potential rota changes"
+  author:"Iain Crossingham"
+  authorLink:"http://iainxingham.github.io/"
+  date:`(new Date()).toDateString()`
+  background:"#222222"
+  color:"#ffffff"
+   /]
+
+[data name:"current" source:"current.csv" /]
+[data name:"twoblock" source:"twoblock.csv"/]
+[var name:"Min_on_rota" value:14 /]
+[var name:"Off_rota" value:1 /]
+[var name:"Blocks" value:3.0 /]
+[var name:"Blocks2" value:6.0 /]
+
+## Introduction
+
+The is an urgent need to agree mechanisms for people to come off the on call rota when necessary.
+
+Some suggested principles
+
+* We all have the theoretical option of resigning altogether with a standard notice period. It should be similarly be possible to "resign" from critical care, with a similar notice period, regardless of the number of others on the critical care rota. This would mean stopping **all** critical care activities and negotating a job plan entirely in the *other* speciality. A return to critical care at a later date should be possible but not automatic and should require the agreement of those on the rota at that time.
+
+* It would be desirable to have a mechanism for dropping the critical care rota but continue with some other critical care duties. Such a mechanism allows the unit to retain the experience of more senior staff finding out of hours work onerous. Unlike "resignation" above it should be subject to a minimum number remaining on the on call rota.
+
+* Those remaining on the on call rota should get *sufficient* daytime critical care exposure, so daytime sessions available to those not on the rota will necessarily be limited.
+
+* Accommodation for daytime sessions for those not on the rota should not overly disrupt the rest of the rota pattern ie regular "odd days", "mini blocks", etc are not acceptable.
+
+* A minimum acceptable number on the rota / maximum acceptable weekend frequency needs to be agreed now. It is mathematically for people to come of the rota and the frequency of on call not to increase so *no increase in frequency* isn't a helpful stance.
+
+* New appointments will increase the number on the rota so the capacity to allow people to come of the rota will vary with time. Subject to the minimum rota number, we shouldn't tie coming off the rota to new appointments or insist on a "one in, one out" policy.
+
+* Some supporting professional activities involve representing the critical care staff directly and shouldn't be done by those without "skin in the game". Such activities need to be dropped when coming off the on call rota (possibly with a time limited, prospectively agreed transition period to allow another individual to take over). Activities that come under this would include clinical director, representing the unit to the network, possibly some education roles.
+
+* The Wednesday MDT is useful to maintain contact with critical care if clinical sessions are reduced. Attendence should be strongly encouraged and job planned for those not on the on call rota.
+
+* People coming off the rota could allow development of non standard critical care clinical sessions, for example in a follow up clinic or taking the on call registrar bleep for the afternoon to allow juniors to go to teaching. These might be easy ways of increasing non rota clinical ICU time.
+
+## Modelling
+
+Number on the rota: 
+[Range value:Min_on_rota min:10 max:20 step:0.5 /]
+[Display value:Min_on_rota /]
+
+Number not on the rota:
+[Range value:Off_rota min:1 max:10 /]
+[Display value:Off_rota /]
+
+
+
+### Xmas rota
+
+This modelling assumes a 50 week year. The other two weeks are covered by the Xmas rota and so more complicated. The 14 on call slots in this fortnight would be covered by those on the rota, but others should contribute to daytime sessions. 
+
+Similarly, bank holiday on calls have been ignored but should be covered using the current points system. The system of giving the block week person "first dibs" on Monday bank holiday day shifts should continue.
+
+
+### Current rota pattern
+
+[Table data:current /]
+
+Desired block weeks per year (for those on the rota):
+[Range value:Blocks min:2.0 max:4.0 step:0.1 /]
+[Display value:Blocks /]
+
+With [Display value:Min_on_rota /] on the rota:- 
+
+Frequency of weekends: 1 in [Display value:`Min_on_rota / 2` /] 
+
+Weekends per year: [Display value:`100 / Min_on_rota ` /]
+
+Blocks per year for those on the rota: [Display value:`Math.min(50 / Min_on_rota, Blocks)` /]
+
+Blocks available: [Display value:`50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))` /] or [Display value:`(50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota` /] per non rota person per year.
+
+[derived name:"on_block" value:`Math.min(50 / Min_on_rota, Blocks) * 0.2` /]
+[derived name:"off_block" value:`(50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota * 0.2` /]
+
+[derived name:"on_day" value:`6 * 2.5 / Min_on_rota` /]
+[derived name:"on_night" value:`(1.52 * 17.5) / Min_on_rota` /]
+
+[Table data:`[{Group: "On rota", Block_PAs: on_block.toFixed(2), Day_PAs: on_day.toFixed(2), Oncall_PAs: on_night.toFixed(2), 
+               Total: (on_block + on_day + on_night).toFixed(2)}, 
+              {Group: "Off rota", Block_PAs: off_block.toFixed(2), Day_PAs: 0, Oncall_PAs: 0, Total: off_block.toFixed(2)}]` /]
+
+[derived name:"total_PAs" value:`(on_block + on_day + on_night) * Min_on_rota + (off_block * Off_rota)` /]
+
+Total clinical ICU PAs: [Display value:total_PAs /] with [Display value:`((off_block * Off_rota) / total_PAs * 100).toFixed(2)` /]% from off rota staff. (Saturday and Sunday morning sessions for "time back" are not included).
+
+
+### Two blocks rota pattern
+
+[Table data:twoblock /]
+
+Assume an additional 1 hour Monday to Thursday for the on call person to take handover.
+
+Desired block weeks per year (for those on the rota):
+[Range value:Blocks2 min:3.0 max:8.0 step:0.1 /]
+[Display value:Blocks2 /]
+
+With [Display value:Min_on_rota /] on the rota:- 
+
+Frequency of weekends: 1 in [Display value:`Min_on_rota / 2` /] 
+
+Weekends per year: [Display value:`100 / Min_on_rota ` /]
+
+Blocks per year for those on the rota: [Display value:`Math.min(100 / Min_on_rota, Blocks2)` /]
+
+Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))` /] or [Display value:`(100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota` /] per non rota person per year.
+
+[derived name:"on_block2" value:`Math.min(100 / Min_on_rota, Blocks2) * 0.2` /]
+[derived name:"off_block2" value:`(100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota * 0.2` /]
+
+[derived name:"on_day2" value:`6 / Min_on_rota` /]
+[derived name:"on_night2" value:`(1.52 * 17.5) / Min_on_rota` /]
+
+[Table data:`[{Group: "On rota", Block_PAs: on_block2.toFixed(2), Day_PAs: on_day2.toFixed(2), Oncall_PAs: on_night2.toFixed(2), 
+               Total: (on_block2 + on_day2 + on_night2).toFixed(2)}, 
+              {Group: "Off rota", Block_PAs: off_block2.toFixed(2), Day_PAs: 0, Oncall_PAs: 0, Total: off_block2.toFixed(2)}]` /]
+
+
+[derived name:"total_PAs2" value:`(on_block2 + on_day2 + on_night2) * Min_on_rota + (off_block2 * Off_rota)` /]
+
+Total clinical ICU PAs: [Display value:total_PAs2 /] with [Display value:`((off_block2 * Off_rota) / total_PAs2 * 100).toFixed(2)` /]% from off rota staff. (Saturday and Sunday morning sessions for "time back" are not included).
+

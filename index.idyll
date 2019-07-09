@@ -83,7 +83,7 @@ Blocks available: [Display value:`50 - (Min_on_rota * Math.min(50 / Min_on_rota,
 [derived name:"off_block" value:`(50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota * 0.2` /]
 
 [derived name:"on_day" value:`6 * 2.5 / Min_on_rota` /]
-[derived name:"on_night" value:`(1.52 * 17.5) / Min_on_rota` /]
+[derived name:"on_night" value:`(1.52 * 16.5) / Min_on_rota` /]
 
 [Table data:`[{Group: "On rota", Block_PAs: on_block.toFixed(2), Day_PAs: on_day.toFixed(2), Oncall_PAs: on_night.toFixed(2), 
                Total: (on_block + on_day + on_night).toFixed(2)}, 
@@ -118,7 +118,7 @@ Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rot
 [derived name:"off_block2" value:`(100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota * 0.2` /]
 
 [derived name:"on_day2" value:`6 / Min_on_rota` /]
-[derived name:"on_night2" value:`(1.52 * 17.5) / Min_on_rota` /]
+[derived name:"on_night2" value:`(1.52 * 16.5) / Min_on_rota` /]
 
 [Table data:`[{Group: "On rota", Block_PAs: on_block2.toFixed(2), Day_PAs: on_day2.toFixed(2), Oncall_PAs: on_night2.toFixed(2), 
                Total: (on_block2 + on_day2 + on_night2).toFixed(2)}, 

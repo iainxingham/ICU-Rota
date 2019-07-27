@@ -13,10 +13,10 @@
 
 [data name:"current" source:"current.csv" /]
 [data name:"twoblock" source:"twoblock.csv"/]
-[var name:"Min_on_rota" value:14 /]
-[var name:"Off_rota" value:1 /]
-[var name:"Blocks" value:3.0 /]
-[var name:"Blocks2" value:6.0 /]
+[var name:"Min_on_rota" value:16.5 /]
+[var name:"Off_rota" value:0 /]
+[var name:"Blocks" value:3.1 /]
+[var name:"Blocks2" value:6.2 /]
 
 ## Introduction
 
@@ -32,11 +32,11 @@ Some suggested principles
 
 * Accommodation for daytime sessions for those not on the rota should not overly disrupt the rest of the rota pattern ie regular "odd days", "mini blocks", etc are not acceptable.
 
-* A minimum acceptable number on the rota / maximum acceptable weekend frequency needs to be agreed now. It is mathematically for people to come of the rota and the frequency of on call not to increase so *no increase in frequency* isn't a helpful stance.
+* A minimum acceptable number on the rota / maximum acceptable weekend frequency needs to be agreed now. It is mathematically impossibile for people to come off the rota and the frequency of on call not to increase so *no increase in frequency* isn't a helpful stance.
 
 * New appointments will increase the number on the rota so the capacity to allow people to come of the rota will vary with time. Subject to the minimum rota number, we shouldn't tie coming off the rota to new appointments or insist on a "one in, one out" policy.
 
-* Some supporting professional activities involve representing the critical care staff directly and shouldn't be done by those without "skin in the game". Such activities need to be dropped when coming off the on call rota (possibly with a time limited, prospectively agreed transition period to allow another individual to take over). Activities that come under this would include clinical director, representing the unit to the network, possibly some education roles.
+* Some supporting professional activities involve representing the critical care staff directly and shouldn't be done by those without "skin in the game". Such activities need to be dropped when coming off the on call rota (possibly with a time limited, prospectively agreed transition period to allow another individual to take over). Activities that come under this would include direct management of the unit, representing the unit to the network, possibly some education roles.
 
 * The Wednesday MDT is useful to maintain contact with critical care if clinical sessions are reduced. Attendence should be strongly encouraged and job planned for those not on the on call rota.
 
@@ -44,14 +44,35 @@ Some suggested principles
 
 ## Modelling
 
-Number on the rota: 
+We currently have 16.5 whole time equivalents on the rota and no one off the rota but contributing daytime critical care. The sliders below show the effects of varying these numbers on the daytime and out of hours commitments for those remaining on the rota. They can also show the impact of adding new staff to the on call rota.
+
+**Number on the rota:** 
 [Range value:Min_on_rota min:10 max:20 step:0.5 /]
 [Display value:Min_on_rota /]
 
-Number not on the rota:
-[Range value:Off_rota min:1 max:10 /]
+**Number not on the rota:**
+[Range value:Off_rota min:0 max:10 /]
 [Display value:Off_rota /]
 
+**Desired block weeks per year (for those on the rota):**
+
+*For current rota* 
+[Range value:Blocks min:2.0 max:4.0 step:0.1 /]
+[Display value:Blocks /]
+
+*Two blocks, Monday to Thursday*
+[Range value:Blocks2 min:3.0 max:8.0 step:0.1 /]
+[Display value:Blocks2 /]
+
+[derived name:"on_block" value:`Math.min(50 / Min_on_rota, Blocks) * 0.2` /]
+[derived name:"off_block" value:`Off_rota ? ((50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota * 0.2) : 0 ` /]
+[derived name:"on_day" value:`6 * 2.5 / Min_on_rota` /]
+[derived name:"on_night" value:`(1.52 * 16.5) / Min_on_rota` /]
+
+[derived name:"on_block2" value:`Math.min(100 / Min_on_rota, Blocks2) * 0.2` /]
+[derived name:"off_block2" value:`Off_rota ? ((100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota * 0.2) : 0` /]
+[derived name:"on_day2" value:`6 / Min_on_rota` /]
+[derived name:"on_night2" value:`(1.52 * 16.5) / Min_on_rota` /]
 
 
 ### Xmas rota
@@ -61,13 +82,70 @@ This modelling assumes a 50 week year. The other two weeks are covered by the Xm
 Similarly, bank holiday on calls have been ignored but should be covered using the current points system. The system of giving the block week person "first dibs" on Monday bank holiday day shifts should continue.
 
 
+### Comparisons
+
+[IdyllVegaLite
+  data:`[
+        {Scenario: "Now", Weekends_year: 6.06}, 
+        {Scenario: "With current rota", Weekends_year: 100 / Min_on_rota},
+        {Scenario: "With two blocks", Weekends_year: 100 / Min_on_rota}
+      ]`
+  spec:`{
+    width: 300,
+    height: 200,
+    renderer: 'svg',
+    mark: "bar",
+    encoding: {
+      x: {field: "Scenario", type: "nominal"},
+      y: {
+        field: "Weekends_year", 
+        type: "quantitative",
+        axis: {title: "Weekends per year"}
+      }
+    }
+  }`
+/]
+
+[IdyllVegaLite
+  data:`[
+        {Scenario: "Now", Daytime: 1.52, On_call: 1.52, Off_rota: 0}, 
+        {Scenario: "With current rota", Daytime: on_block+on_day, On_call: on_night, Off_rota_PAs: off_block},
+        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2}
+      ]`
+  spec:`{
+    width: 300,
+    height: 200,
+    renderer: 'svg',
+    mark: "bar",
+    encoding: {
+      x: {field: "Scenario", type: "nominal"},
+      y: {field: "Daytime", type: "quantitative", axis: {title: "Daytime clinical PAs"}}
+    }
+  }`
+/]
+
+[IdyllVegaLite
+  data:`[
+        {Scenario: "Now", Daytime: 1.52, On_call: 1.52, Off_rota: 0}, 
+        {Scenario: "With current rota", Daytime: on_block+on_day, On_call: on_night, Off_rota_PAs: off_block},
+        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2}
+      ]`
+  spec:`{
+    width: 300,
+    height: 200,
+    renderer: 'svg',
+    mark: "bar",
+    encoding: {
+      x: {field: "Scenario", type: "nominal"},
+      y: {field: "On_call", type: "quantitative", axis: {title: "On call clinical PAs"}}
+    }
+  }`
+/]
+
+
 ### Current rota pattern
 
 [Table data:current /]
-
-Desired block weeks per year (for those on the rota):
-[Range value:Blocks min:2.0 max:4.0 step:0.1 /]
-[Display value:Blocks /]
 
 With [Display value:Min_on_rota /] on the rota:- 
 
@@ -77,13 +155,7 @@ Weekends per year: [Display value:`100 / Min_on_rota ` /]
 
 Blocks per year for those on the rota: [Display value:`Math.min(50 / Min_on_rota, Blocks)` /]
 
-Blocks available: [Display value:`50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))` /] or [Display value:`(50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota` /] per non rota person per year.
-
-[derived name:"on_block" value:`Math.min(50 / Min_on_rota, Blocks) * 0.2` /]
-[derived name:"off_block" value:`(50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota * 0.2` /]
-
-[derived name:"on_day" value:`6 * 2.5 / Min_on_rota` /]
-[derived name:"on_night" value:`(1.52 * 16.5) / Min_on_rota` /]
+Blocks available: [Display value:`50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))` /] or [Display value:`Off_rota ? ((50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota) : 0` /] per non rota person per year.
 
 [Table data:`[{Group: "On rota", Block_PAs: on_block.toFixed(2), Day_PAs: on_day.toFixed(2), Oncall_PAs: on_night.toFixed(2), 
                Total: (on_block + on_day + on_night).toFixed(2)}, 
@@ -93,16 +165,16 @@ Blocks available: [Display value:`50 - (Min_on_rota * Math.min(50 / Min_on_rota,
 
 Total clinical ICU PAs: [Display value:total_PAs /] with [Display value:`((off_block * Off_rota) / total_PAs * 100).toFixed(2)` /]% from off rota staff. (Saturday and Sunday morning sessions for "time back" are not included).
 
+[Conditional if: `total_PAs < 50.08`]
+Warning: Not all blocks covered - increase number of blocks for those on the rota or add off rota people.
+[/Conditional]
+
 
 ### Two blocks rota pattern
 
 [Table data:twoblock /]
 
-Assume an additional 1 hour Monday to Thursday for the on call person to take handover.
-
-Desired block weeks per year (for those on the rota):
-[Range value:Blocks2 min:3.0 max:8.0 step:0.1 /]
-[Display value:Blocks2 /]
+Assume an additional 1 hour Monday to Thursday for the on call person to take handover, included in the daytime PA allocation.
 
 With [Display value:Min_on_rota /] on the rota:- 
 
@@ -112,13 +184,7 @@ Weekends per year: [Display value:`100 / Min_on_rota ` /]
 
 Blocks per year for those on the rota: [Display value:`Math.min(100 / Min_on_rota, Blocks2)` /]
 
-Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))` /] or [Display value:`(100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota` /] per non rota person per year.
-
-[derived name:"on_block2" value:`Math.min(100 / Min_on_rota, Blocks2) * 0.2` /]
-[derived name:"off_block2" value:`(100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota * 0.2` /]
-
-[derived name:"on_day2" value:`6 / Min_on_rota` /]
-[derived name:"on_night2" value:`(1.52 * 16.5) / Min_on_rota` /]
+Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))` /] or [Display value:`Off_rota ? ((100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota) : 0` /] per non rota person per year.
 
 [Table data:`[{Group: "On rota", Block_PAs: on_block2.toFixed(2), Day_PAs: on_day2.toFixed(2), Oncall_PAs: on_night2.toFixed(2), 
                Total: (on_block2 + on_day2 + on_night2).toFixed(2)}, 
@@ -128,4 +194,8 @@ Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rot
 [derived name:"total_PAs2" value:`(on_block2 + on_day2 + on_night2) * Min_on_rota + (off_block2 * Off_rota)` /]
 
 Total clinical ICU PAs: [Display value:total_PAs2 /] with [Display value:`((off_block2 * Off_rota) / total_PAs2 * 100).toFixed(2)` /]% from off rota staff. (Saturday and Sunday morning sessions for "time back" are not included).
+
+[Conditional if: `total_PAs2 < 51.08`]
+Warning: Not all blocks covered - increase number of blocks for those on the rota or add off rota people.
+[/Conditional]
 

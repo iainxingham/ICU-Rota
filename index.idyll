@@ -6,7 +6,7 @@
   subtitle:"Modelling potential rota changes"
   author:"Iain Crossingham"
   authorLink:"http://iainxingham.github.io/"
-  date:`(new Date()).toDateString()`
+  date:"27/7/19, edited 1/8/19"
   background:"#222222"
   color:"#ffffff"
    /]
@@ -66,7 +66,9 @@ We currently have 16.5 whole time equivalents on the rota and no one off the rot
 [Range value:Blocks2 min:3.0 max:8.0 step:0.1 /]
 [Display value:Blocks2 /]
 
-**Number of weekends per year for those off on call rota:**
+**Weekends for those off on call rota:**
+
+*Number per year*
 [Range value:Off_rota_we min:0 max:10 step:0.5 /]
 [Display value: Off_rota_we/]
 
@@ -79,6 +81,13 @@ We currently have 16.5 whole time equivalents on the rota and no one off the rot
 [derived name:"off_block2" value:`Off_rota ? ((100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota * 0.2) : 0` /]
 [derived name:"on_day2" value:`6 / Min_on_rota` /]
 [derived name:"on_night2" value:`(1.52 * 16.5) / Min_on_rota` /]
+
+[derived name:"off_day3" value:`Off_rota_we * Off_rota * 2.5` /]
+[derived name:"off_we3" value:`Off_rota_we * Off_rota * 12.33` /]
+[derived name:"on_night3" value:`((1.52 * 16.5) - 8)/ Min_on_rota` /]
+[derived name:"on_PAs3" value:`(on_block2 + ((250-off_day3)/(Min_on_rota*50)) + ((616.5-off_we3)/(Min_on_rota*50)) + on_night3)` /]
+[derived name:"off_PAs3" value:`(Off_rota ? (off_block2 + (off_day3+off_we3)/(Off_rota*50)) : off_block2)` /]
+[derived name:"total_PAs3" value:`on_PAs3 * Min_on_rota + off_PAs3 * Off_rota` /]
 
 
 ### Xmas rota
@@ -94,7 +103,8 @@ Similarly, bank holiday on calls have been ignored but should be covered using t
   data:`[
         {Scenario: "Now", Weekends_year: 6.06}, 
         {Scenario: "With current rota", Weekends_year: 100 / Min_on_rota},
-        {Scenario: "With two blocks", Weekends_year: 100 / Min_on_rota}
+        {Scenario: "With two blocks", Weekends_year: 100 / Min_on_rota},
+        {Scenario: "Justin's weekend model", Weekends_year: (150 - Off_rota_we*Off_rota_we) / Min_on_rota}
       ]`
   spec:`{
     width: 300,
@@ -116,7 +126,11 @@ Similarly, bank holiday on calls have been ignored but should be covered using t
   data:`[
         {Scenario: "Now", Daytime: 1.52, On_call: 1.52, Off_rota: 0}, 
         {Scenario: "With current rota", Daytime: on_block+on_day, On_call: on_night, Off_rota_PAs: off_block},
-        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2}
+        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2},
+        {Scenario: "Justin's weekend model", Daytime: (on_block2 + ((250-off_day3)/(Min_on_rota*50)) + 
+                                                                   ((616.5-off_we3)/(Min_on_rota*50))),
+                                             On_call: on_night3,
+                                             Off_rota_PAs: off_PAs3}
       ]`
   spec:`{
     width: 300,
@@ -134,7 +148,11 @@ Similarly, bank holiday on calls have been ignored but should be covered using t
   data:`[
         {Scenario: "Now", Daytime: 1.52, On_call: 1.52, Off_rota: 0}, 
         {Scenario: "With current rota", Daytime: on_block+on_day, On_call: on_night, Off_rota_PAs: off_block},
-        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2}
+        {Scenario: "With two blocks", Daytime: on_block2+on_day2, On_call: on_night2, Off_rota_PAs: off_block2},
+        {Scenario: "Justin's weekend model", Daytime: (on_block2 + ((250-off_day3)/(Min_on_rota*50)) + 
+                                                                   ((616.5-off_we3)/(Min_on_rota*50))),
+                                             On_call: on_night3,
+                                             Off_rota_PAs: off_PAs3}
       ]`
   spec:`{
     width: 300,
@@ -215,9 +233,30 @@ With [Display value:Min_on_rota /] on the rota:-
 
 Frequency of weekends: 1 in [Display value:`50 / ((150 - Off_rota * Off_rota_we)/ Min_on_rota)` /] 
 
-Weekends per year (on oncall rota): [Display value:`(150 - Off_rota * Off_rota_we)/ Min_on_rota ` /] 
+Weekends per year (on oncall rota): [Display value:`(150 - Off_rota * Off_rota_we)/ Min_on_rota ` /]  
+
 Weekends per year (off on call rota): [Display value:Off_rota_we/]
 
 Blocks per year for those on the rota: [Display value:`Math.min(100 / Min_on_rota, Blocks2)` /]
 
 Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))` /] or [Display value:`Off_rota ? ((100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota) : 0` /] per non rota person per year.
+
+[Table data:`[{Group: "On rota", Block_PAs: on_block2.toFixed(2), 
+                                 Day_PAs:((250-off_day3)/(Min_on_rota*50)).toFixed(2), 
+                                 Weekend_PAs:((616.5-off_we3)/(Min_on_rota*50)).toFixed(2),
+                                 Oncall_PAs: on_night3.toFixed(2), 
+                                 Total: (on_block2 + ((250-off_day3)/(Min_on_rota*50)) + 
+                                        ((616.5-off_we3)/(Min_on_rota*50)) + on_night3
+                                        ).toFixed(2)}, 
+              {Group: "Off rota", Block_PAs: off_block2.toFixed(2), 
+                                  Day_PAs: (Off_rota ? (off_day3/(50 * Off_rota)) : 0).toFixed(2),
+                                  Weekend_PAs:(Off_rota ? (off_we3/(50 * Off_rota)) : 0).toFixed(2), 
+                                  Oncall_PAs: 0.00, 
+                                  Total: (Off_rota ? (off_block2 + (off_day3+off_we3)/(50*Off_rota)) : off_block2).toFixed(2)}]` /]
+
+
+Total clinical ICU PAs: [Display value:total_PAs3 /] with [Display value:`((off_PAs3 * Off_rota) / total_PAs3 * 100).toFixed(2)` /]% from off rota staff. (Saturday and Sunday morning sessions are included rather than for "time back" in this model).
+
+[Conditional if: `total_PAs3 < 54.41`]
+Warning: Not all blocks covered - increase number of blocks for those on the rota or add off rota people.
+[/Conditional]

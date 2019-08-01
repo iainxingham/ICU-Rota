@@ -1,0 +1,7 @@
+Role,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
+Day (1) 0800 to 1800,A,A,A,A,G,-,-
+Day (2) 0800 to 1800,B,B,B,B,H,-,-
+Day 0800 to 2030,-,-,-,-,-,G,H
+Half day 0800 to 1400,-,-,-,-,-,H,G
+On call 1700 to 0800,C,D,E,F,I,-,-
+On call 2000 to 0800,-,-,-,-,-,I,I

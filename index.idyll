@@ -13,10 +13,12 @@
 
 [data name:"current" source:"current.csv" /]
 [data name:"twoblock" source:"twoblock.csv"/]
+[data name:"justin1" source:"justin1.csv"/]
 [var name:"Min_on_rota" value:16.5 /]
 [var name:"Off_rota" value:0 /]
 [var name:"Blocks" value:3.1 /]
 [var name:"Blocks2" value:6.2 /]
+[var name:"Off_rota_we" value:0 /]
 
 ## Introduction
 
@@ -63,6 +65,10 @@ We currently have 16.5 whole time equivalents on the rota and no one off the rot
 *Two blocks, Monday to Thursday*
 [Range value:Blocks2 min:3.0 max:8.0 step:0.1 /]
 [Display value:Blocks2 /]
+
+**Number of weekends per year for those off on call rota:**
+[Range value:Off_rota_we min:0 max:10 step:0.5 /]
+[Display value: Off_rota_we/]
 
 [derived name:"on_block" value:`Math.min(50 / Min_on_rota, Blocks) * 0.2` /]
 [derived name:"off_block" value:`Off_rota ? ((50 - (Min_on_rota * Math.min(50 / Min_on_rota, Blocks))) / Off_rota * 0.2) : 0 ` /]
@@ -199,3 +205,19 @@ Total clinical ICU PAs: [Display value:total_PAs2 /] with [Display value:`((off_
 Warning: Not all blocks covered - increase number of blocks for those on the rota or add off rota people.
 [/Conditional]
 
+### Justin's model for weekend working
+
+[Table data:justin1/]
+
+Three consultants at the weekend, one on call (presumably non resident) overnight and two doing the daytime work. Weekday work similar to "two block" pattern. 30 minutes handover time per day on Friday, Saturday and Sunday for the on call consultant.
+
+With [Display value:Min_on_rota /] on the rota:- 
+
+Frequency of weekends: 1 in [Display value:`50 / ((150 - Off_rota * Off_rota_we)/ Min_on_rota)` /] 
+
+Weekends per year (on oncall rota): [Display value:`(150 - Off_rota * Off_rota_we)/ Min_on_rota ` /] 
+Weekends per year (off on call rota): [Display value:Off_rota_we/]
+
+Blocks per year for those on the rota: [Display value:`Math.min(100 / Min_on_rota, Blocks2)` /]
+
+Blocks available: [Display value:`100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))` /] or [Display value:`Off_rota ? ((100 - (Min_on_rota * Math.min(100 / Min_on_rota, Blocks2))) / Off_rota) : 0` /] per non rota person per year.
